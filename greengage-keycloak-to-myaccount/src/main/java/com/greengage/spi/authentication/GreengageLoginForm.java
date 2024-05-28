@@ -5,11 +5,8 @@ import org.keycloak.authentication.Authenticator;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.services.managers.AuthenticationManager;
-import org.keycloak.services.resources.LoginActionsService;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
 public class GreengageLoginForm implements Authenticator {
@@ -38,7 +35,7 @@ public class GreengageLoginForm implements Authenticator {
         }
 
         if (!allAttributesExist) {
-            String redirectUrl = String.format(REDIRECT_URL_TEMPLATE, context.getUriInfo().getRequestUri().toString());
+            String redirectUrl = buildRedirectUrl(context);
             Response response = Response.status(Response.Status.FOUND)
                     .location(URI.create(redirectUrl))
                     .build();
@@ -61,7 +58,7 @@ public class GreengageLoginForm implements Authenticator {
                 }
             }
 
-            String redirectUrl = String.format(REDIRECT_URL_TEMPLATE, context.getUriInfo().getRequestUri().toString());
+            String redirectUrl = buildRedirectUrl(context);
             Response response = Response.status(Response.Status.FOUND)
                     .location(URI.create(redirectUrl))
                     .build();
@@ -74,6 +71,12 @@ public class GreengageLoginForm implements Authenticator {
     private boolean isFirstLogin(UserModel user) {
         // Assuming that a user without a last login timestamp is a first-time login
         return user.getAttribute("lastLoginTime").isEmpty();
+    }
+
+    private String buildRedirectUrl(AuthenticationFlowContext context) {
+        // Get the original redirect URL from the session note
+        String originalRedirectUrl = context.getAuthenticationSession().getRedirectUri();
+        return String.format(REDIRECT_URL_TEMPLATE, originalRedirectUrl);
     }
 
     @Override
