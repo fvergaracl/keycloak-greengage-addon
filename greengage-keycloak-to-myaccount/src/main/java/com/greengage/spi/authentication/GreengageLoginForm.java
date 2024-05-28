@@ -76,6 +76,7 @@ public class GreengageLoginForm implements Authenticator {
     private String buildRedirectUrl(AuthenticationFlowContext context) {
         // Get the original redirect URL from the session note
         String originalRedirectUrl = context.getAuthenticationSession().getRedirectUri();
+        System.out.println("Original Redirect URL: " + originalRedirectUrl);
         return String.format(REDIRECT_URL_TEMPLATE, originalRedirectUrl);
     }
 
