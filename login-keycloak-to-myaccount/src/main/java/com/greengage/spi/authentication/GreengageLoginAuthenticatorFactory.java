@@ -1,5 +1,3 @@
-
-
 package com.greengage.spi.authentication;
 
 import org.keycloak.Config;
@@ -39,7 +37,6 @@ public class GreengageLoginAuthenticatorFactory implements AuthenticatorFactory 
         return true;
     }
 
-
     @Override
     public boolean isUserSetupAllowed() {
         return false;
@@ -56,9 +53,7 @@ public class GreengageLoginAuthenticatorFactory implements AuthenticatorFactory 
 
     @Override
     public List<ProviderConfigProperty> getConfigProperties() {
-        return Arrays.asList(
-               
-        );
+        return Arrays.asList();
     }
 
     @Override

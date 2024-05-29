@@ -5,6 +5,7 @@ import org.keycloak.authentication.Authenticator;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.authentication.AuthenticationFlowError;
 
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -39,14 +40,31 @@ public class GreengageLoginAuthenticator implements Authenticator {
                     .build();
             context.forceChallenge(response);
         } else {
-            context.success();
+            if (userHasLoggedInBefore(user)) {
+                context.success();
+            } else {
+                redirectAfterLogin(context);
+            }
         }
     }
 
     @Override
     public void action(AuthenticationFlowContext context) {
         context.success();
-        redirectAfterLogin(context);
+    }
+
+    private boolean userHasLoggedInBefore(UserModel user) {
+        String lastLoginTimeStr = user.getFirstAttribute("lastLoginTime");
+        if (lastLoginTimeStr != null) {
+            try {
+                Long lastLoginTime = Long.parseLong(lastLoginTimeStr);
+                return lastLoginTime != null;
+            } catch (NumberFormatException e) {
+                // Log or handle the exception as needed
+                return false;
+            }
+        }
+        return false;
     }
 
     private String buildRedirectUrl(AuthenticationFlowContext context) {
@@ -60,7 +78,6 @@ public class GreengageLoginAuthenticator implements Authenticator {
                 .location(URI.create(redirectUrl))
                 .build();
         context.getEvent().detail("redirect_after_login", redirectUrl);
-        context.success();
         context.forceChallenge(response);
     }
 
