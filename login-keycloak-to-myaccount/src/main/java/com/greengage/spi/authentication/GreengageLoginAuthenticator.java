@@ -39,14 +39,16 @@ public class GreengageLoginAuthenticator implements Authenticator {
             }
         }
 
-        if (!allAttributesExist) {
+        boolean isuserHasLoggedInBefore = userHasLoggedInBefore(user);
+        if (!allAttributesExist && !isuserHasLoggedInBefore) {
+            user.setSingleAttribute("lastLoginTime", String.valueOf(System.currentTimeMillis()));
             String redirectUrl = buildRedirectUrl(context);
             Response response = Response.status(Response.Status.FOUND)
                     .location(URI.create(redirectUrl))
                     .build();
             context.forceChallenge(response);
         } else {
-            if (userHasLoggedInBefore(user)) {
+            if (isuserHasLoggedInBefore) {
                 context.success();
             } else {
                 redirectAfterLogin(context);
@@ -56,19 +58,16 @@ public class GreengageLoginAuthenticator implements Authenticator {
 
     @Override
     public void action(AuthenticationFlowContext context) {
-        // No se requiere acción específica aquí
         context.success();
     }
 
     private boolean userHasLoggedInBefore(UserModel user) {
-        // Aquí usamos un atributo personalizado para almacenar la última vez que el usuario inició sesión
         String lastLoginTimeStr = user.getFirstAttribute("lastLoginTime");
         if (lastLoginTimeStr != null) {
             try {
                 Long lastLoginTime = Long.parseLong(lastLoginTimeStr);
                 return lastLoginTime != null;
             } catch (NumberFormatException e) {
-                // Maneja la excepción según sea necesario
                 return false;
             }
         }
@@ -81,12 +80,15 @@ public class GreengageLoginAuthenticator implements Authenticator {
     }
 
     private void redirectAfterLogin(AuthenticationFlowContext context) {
+        UserModel user = context.getUser();
+        user.setSingleAttribute("lastLoginTime", String.valueOf(System.currentTimeMillis()));
         String redirectUrl = buildRedirectUrl(context);
         Response response = Response.status(Response.Status.FOUND)
                 .location(URI.create(redirectUrl))
                 .build();
         context.getEvent().detail("redirect_after_login", redirectUrl);
         context.forceChallenge(response);
+        
     }
 
     @Override
@@ -101,11 +103,9 @@ public class GreengageLoginAuthenticator implements Authenticator {
 
     @Override
     public void setRequiredActions(KeycloakSession keycloakSession, RealmModel realmModel, UserModel userModel) {
-        // No se requieren acciones específicas aquí
     }
 
     @Override
     public void close() {
-        // No se requieren acciones específicas aquí
     }
 }
