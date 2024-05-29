@@ -40,20 +40,22 @@ public class GreengageLoginAuthenticator implements Authenticator {
                     .build();
             context.forceChallenge(response);
         } else {
-            if (userHasLoggedInBefore(user)) {
-                context.success();
-            } else {
-                redirectAfterLogin(context);
-            }
+            context.success();
         }
     }
 
     @Override
     public void action(AuthenticationFlowContext context) {
-        context.success();
+        UserModel user = context.getUser();
+        if (userHasLoggedInBefore(user, context)) {
+            context.success();
+        } else {
+            redirectAfterLogin(context);
+        }
     }
 
-    private boolean userHasLoggedInBefore(UserModel user) {
+    private boolean userHasLoggedInBefore(UserModel user, AuthenticationFlowContext context) {
+        // Aquí usamos un atributo personalizado para almacenar la última vez que el usuario inició sesión
         String lastLoginTimeStr = user.getFirstAttribute("lastLoginTime");
         if (lastLoginTimeStr != null) {
             try {
