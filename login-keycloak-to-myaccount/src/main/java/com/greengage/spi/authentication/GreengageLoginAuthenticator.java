@@ -46,11 +46,22 @@ public class GreengageLoginAuthenticator implements Authenticator {
     @Override
     public void action(AuthenticationFlowContext context) {
         context.success();
+        redirectAfterLogin(context);
     }
 
     private String buildRedirectUrl(AuthenticationFlowContext context) {
         String originalRedirectUrl = context.getAuthenticationSession().getRedirectUri();
         return String.format(REDIRECT_URL_TEMPLATE, originalRedirectUrl);
+    }
+
+    private void redirectAfterLogin(AuthenticationFlowContext context) {
+        String redirectUrl = buildRedirectUrl(context);
+        Response response = Response.status(Response.Status.FOUND)
+                .location(URI.create(redirectUrl))
+                .build();
+        context.getEvent().detail("redirect_after_login", redirectUrl);
+        context.success();
+        context.forceChallenge(response);
     }
 
     @Override
