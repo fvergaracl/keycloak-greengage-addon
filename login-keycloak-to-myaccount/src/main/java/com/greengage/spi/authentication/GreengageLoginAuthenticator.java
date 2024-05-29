@@ -43,18 +43,14 @@ public class GreengageLoginAuthenticator implements Authenticator {
         String clientId = context.getAuthenticationSession().getClient().getClientId();
         boolean isuserHasLoggedInBefore = userHasLoggedInBefore(user);
         if (!allAttributesExist && !isuserHasLoggedInBefore && !clientId.equals("myAccount")) {
-            user.setSingleAttribute("lastLoginTime", String.valueOf(System.currentTimeMillis()));
+            user.setSingleAttribute("firstTimeLogin", String.valueOf(System.currentTimeMillis()));
             String redirectUrl = buildRedirectUrl(context);
             Response response = Response.status(Response.Status.FOUND)
                     .location(URI.create(redirectUrl))
                     .build();
             context.forceChallenge(response);
         } else {
-            if (isuserHasLoggedInBefore) {
-                context.success();
-            } else {
-                redirectAfterLogin(context);
-            }
+            context.success();
         }
     }
 
@@ -64,11 +60,11 @@ public class GreengageLoginAuthenticator implements Authenticator {
     }
 
     private boolean userHasLoggedInBefore(UserModel user) {
-        String lastLoginTimeStr = user.getFirstAttribute("lastLoginTime");
-        if (lastLoginTimeStr != null) {
+        String firstTimeLoginStr = user.getFirstAttribute("firstTimeLogin");
+        if (firstTimeLoginStr != null) {
             try {
-                Long lastLoginTime = Long.parseLong(lastLoginTimeStr);
-                return lastLoginTime != null;
+                Long firstTimeLogin = Long.parseLong(firstTimeLoginStr);
+                return firstTimeLogin != null;
             } catch (NumberFormatException e) {
                 return false;
             }
@@ -83,7 +79,7 @@ public class GreengageLoginAuthenticator implements Authenticator {
 
     private void redirectAfterLogin(AuthenticationFlowContext context) {
         UserModel user = context.getUser();
-        user.setSingleAttribute("lastLoginTime", String.valueOf(System.currentTimeMillis()));
+        user.setSingleAttribute("firstTimeLogin", String.valueOf(System.currentTimeMillis()));
         String redirectUrl = buildRedirectUrl(context);
         Response response = Response.status(Response.Status.FOUND)
                 .location(URI.create(redirectUrl))
