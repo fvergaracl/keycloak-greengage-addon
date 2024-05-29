@@ -6,6 +6,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.authentication.AuthenticationFlowError;
+import org.keycloak.models.ClientModel;
 
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -39,8 +40,9 @@ public class GreengageLoginAuthenticator implements Authenticator {
             }
         }
 
+        String clientId = context.getAuthenticationSession().getClient().getClientId();
         boolean isuserHasLoggedInBefore = userHasLoggedInBefore(user);
-        if (!allAttributesExist && !isuserHasLoggedInBefore) {
+        if (!allAttributesExist && !isuserHasLoggedInBefore && !clientId.equals("myAccount")) {
             user.setSingleAttribute("lastLoginTime", String.valueOf(System.currentTimeMillis()));
             String redirectUrl = buildRedirectUrl(context);
             Response response = Response.status(Response.Status.FOUND)

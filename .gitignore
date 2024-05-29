@@ -1,2 +1,3 @@
 login-keycloak-to-myaccount/target
 register-keycloak-to-myaccount/target
+login-keycloak-to-myaccount/target/*
