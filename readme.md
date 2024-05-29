@@ -50,3 +50,10 @@ To make changes to the authenticator, edit the Java files in the `src/main/java/
 After making changes, recompile the project with Maven:
 ```sh
 mvn clean package
+```
+
+## build in one-command
+
+```sh
+bash build.sh
+```
